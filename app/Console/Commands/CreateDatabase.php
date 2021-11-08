@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\Console\Input\InputArgument;
+use PDO;
 
 class CreateDatabase extends Command
 {
@@ -13,7 +13,7 @@ class CreateDatabase extends Command
      *
      * @var string
      */
-    protected $signature = 'make:database';
+    protected $signature = 'make:database {dbname} {connection?}';
 
     /**
      * The console command description.
@@ -32,18 +32,6 @@ class CreateDatabase extends Command
         parent::__construct();
     }
 
-    protected function getArguments()
-    {
-        return [
-            ['name', InputArgument::REQUIRED, 'The name of the database'],
-        ];
-    }
-
-    public function fire()
-    {
-        DB::getConnection()->statement('CREATE DATABASE :schema', ['schema' => $this->argument('name')]);
-    }
-
     /**
      * Execute the console command.
      *
@@ -51,5 +39,20 @@ class CreateDatabase extends Command
      */
     public function handle()
     {
+        try {
+            $dbname = $this->argument('dbname');
+            $connection = $this->hasArgument('connection') && $this->argument('connection') ? $this->argument('connection') : DB::connection()->getPDO()->getAttribute(PDO::ATTR_DRIVER_NAME);
+
+            $hasDb = DB::connection($connection)->select('SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '."'".$dbname."'");
+
+            if (empty($hasDb)) {
+                DB::connection($connection)->select('CREATE DATABASE '.$dbname);
+                $this->info("Database '$dbname' created for '$connection' connection");
+            } else {
+                $this->info("Database $dbname already exists for $connection connection");
+            }
+        } catch (\Exception $e) {
+            $this->error($e->getMessage());
+        }
     }
 }
