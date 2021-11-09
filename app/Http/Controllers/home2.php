@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Asignatura;
-use App\Seccion_semestre;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Redirect;
 
 class home2 extends Controller
 {
-    private $rut, $periodos, $date;
+    private $rut;
+    private $periodos;
+    private $date;
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -35,7 +35,7 @@ class home2 extends Controller
         $user = Auth::user()->email;
         $tipo = DB::connection('mysql3')->table('users')->where('email', $user)->value('tipo');
 
-        if ($tipo == 'alumno') {
+        if ('alumno' == $tipo) {
             //datos para alumnos
             $this->rut = DB::connection('mysql3')->table('alumnos')->where('email', $user)->value('rut');
             $asignaturas = DB::connection('mysql3')->table('alumno_seccions')
@@ -106,25 +106,25 @@ class home2 extends Controller
             $estatus = [];
 
             foreach ($asignaturas as $key => $value) {
-                if ($value->link_encuesta == 'none') {
+                if ('none' == $value->link_encuesta) {
                     continue;
                 } else {
                     $survey_id = Str::after($value->link_encuesta, 'limesurvey.test/index.php/');
 
                     $surveys_ids[$count] = ['id' => $survey_id, 'nrc' => $value->nrc];
-                    $count++;
+                    ++$count;
                 }
             }
 
             // instantiate a new client
-            $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient(LS_BASEURL . '/admin/remotecontrol');
+            $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient(LS_BASEURL.'/admin/remotecontrol');
 
             // receive session key
             $sessionKey = $myJSONRPCClient->get_session_key(LS_USER, LS_PASSWORD);
 
-            $aConditions = array('email' => Auth::user()->email);
+            $aConditions = ['email' => Auth::user()->email];
 
-            $attributes = ["completed", "usesleft"];
+            $attributes = ['completed', 'usesleft'];
 
             $count = 0;
 
@@ -134,13 +134,12 @@ class home2 extends Controller
                 if (!isset($list_participants[0])) {
                     continue;
                 } else {
-
-                    if($list_participants[0]['participant_info']['email'] == Auth::user()->email and $list_participants[0]['completed'] == "Y"){
-                        DB::table('alumno_seccions')->where([['rut_alumno','=',$this->rut],['nrc','=',$value['nrc']]])
-                        ->update(['resp_encuesta' => "Y"]);
+                    if ($list_participants[0]['participant_info']['email'] == Auth::user()->email and 'Y' == $list_participants[0]['completed']) {
+                        DB::table('alumno_seccions')->where([['rut_alumno', '=', $this->rut], ['nrc', '=', $value['nrc']]])
+                        ->update(['resp_encuesta' => 'Y']);
                     }
                     $estatus[$count] = ['nrc' => $value['nrc'], 'estado' => $list_participants[0]['completed']];
-                    $count++;
+                    ++$count;
                 }
             }
             $myJSONRPCClient->release_session_key($sessionKey);
@@ -152,9 +151,9 @@ class home2 extends Controller
                 'campus_clinico' => $campus_clinico,
                 'asignaturas' => $asignaturas,
                 'rotaciones' => $rotaciones,
-                'estados' => $estatus
+                'estados' => $estatus,
             ]);
-        } else if ($tipo == 'docente') {
+        } elseif ('docente' == $tipo) {
             $periodos = DB::connection('mysql3')->table('periodos')
                 ->where('estado', '>', '1')->get()->toArray();
 
@@ -186,7 +185,6 @@ class home2 extends Controller
                 ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
                 ->select(DB::raw('count(alumno_seccions.nrc) as cantidad_seccion'), 'seccion_semestres.nrc', 'seccion_semestres.actividad')->get();
 
-
             //datos Campus clinico Docente
             $campus_clinico = DB::connection('mysql3')->table('rotacion_semestres')
                 ->join('campus_seccions', 'campus_seccions.seccion_semestre', 'rotacion_semestres.idRotacion')
@@ -213,7 +211,7 @@ class home2 extends Controller
                 ->groupBy('campus_seccions.nrc')
                 ->where([
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['docente_seccions.idDocente', '=', $this->rut]
+                    ['docente_seccions.idDocente', '=', $this->rut],
                 ])
                 ->select(
                     DB::raw('count(distinct(alumnos.rut)) as cant_alumnos_cli, count(campus_seccions.res_encuesta) as resp_encuesta'),
@@ -228,7 +226,7 @@ class home2 extends Controller
                 ->groupBy('campus_seccions.nrc')
                 ->where([
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['docente_seccions.idDocente', '=', $this->rut]
+                    ['docente_seccions.idDocente', '=', $this->rut],
                 ])
                 ->select(DB::raw('count(distinct(campus_seccions.profesor_seccion)) as cant_profesor'), 'campus_seccions.nrc')->get();
 
@@ -242,7 +240,7 @@ class home2 extends Controller
                 ->join('hospitals', 'hospitals.idhospital', 'rotacion_semestres.idhospital')
                 ->where([
                     ['docente_seccions.idDocente', '=', $this->rut],
-                    ['seccion_semestres.idPeriodo', '=', $this->periodos]
+                    ['seccion_semestres.idPeriodo', '=', $this->periodos],
                 ])
                 ->groupBy(
                     'campus_seccions.rotacion',
@@ -283,7 +281,7 @@ class home2 extends Controller
                 ->orderBy('seccion_semestres.nrc')
                 ->where([
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['alumno_seccions.resp_encuesta', '=', 'Y']
+                    ['alumno_seccions.resp_encuesta', '=', 'Y'],
                 ])
                 ->select(
                     DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
@@ -302,7 +300,7 @@ class home2 extends Controller
                 ->where([
                     ['campus_seccions.res_encuesta', '=', 'si'],
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['docente_seccions.idDocente', '=', $this->rut]
+                    ['docente_seccions.idDocente', '=', $this->rut],
                 ])
                 ->groupBy('campus_seccions.nrc', 'campus_seccions.rotacion')
                 ->select(DB::raw('count(campus_seccions.res_encuesta) as resp_encuesta'), 'campus_seccions.nrc', 'campus_seccions.rotacion')->get();
@@ -317,7 +315,7 @@ class home2 extends Controller
                 ->where([
                     ['campus_seccions.entrega_rubrica', '=', 'si'],
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['docente_seccions.idDocente', '=', $this->rut]
+                    ['docente_seccions.idDocente', '=', $this->rut],
                 ])
                 ->groupBy('campus_seccions.nrc')
                 ->select(DB::raw('count(campus_seccions.entrega_rubrica) as entrego_rubrica'), 'campus_seccions.nrc')->get();
@@ -333,7 +331,7 @@ class home2 extends Controller
                 ->where([
                     ['campus_seccions.res_encuesta', '=', 'si'],
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['docente_seccions.idDocente', '=', $this->rut]
+                    ['docente_seccions.idDocente', '=', $this->rut],
                 ])
                 ->groupBy('campus_seccions.nrc', 'campus_seccions.rotacion')
                 ->select(DB::raw('count(campus_seccions.entrega_rubrica) as entrego_rubrica'), 'campus_seccions.nrc', 'campus_seccions.rotacion')->get();
@@ -349,7 +347,7 @@ class home2 extends Controller
                 ->where([
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
                     ['campus_seccions.res_encuesta', '=', 'si'],
-                    ['docente_seccions.idDocente', '=', $this->rut]
+                    ['docente_seccions.idDocente', '=', $this->rut],
                 ])
                 ->select(
                     DB::raw('count(campus_seccions.res_encuesta) as resp_encuesta'),
@@ -378,9 +376,9 @@ class home2 extends Controller
                 'respuestas_clinicas' => $respuestas_clinicas,
                 'respuestas_rotaciones' => $respuestas_rotaciones,
                 'entrego_rubrica' => $entregas_rubrica,
-                'rotaciones_rubrica' => $rotaciones_rubrica
+                'rotaciones_rubrica' => $rotaciones_rubrica,
             ]);
-        } else if ($tipo == 'PA') {
+        } elseif ('PA' == $tipo) {
             $periodos = DB::connection('mysql3')->table('periodos')
                 ->where('estado', '>', '1')->get()->toArray();
 
@@ -431,7 +429,6 @@ class home2 extends Controller
                 ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
                 ->select(DB::raw('count(alumno_seccions.nrc) as cantidad_seccion'), 'seccion_semestres.nrc', 'seccion_semestres.actividad')->get();
 
-
             //datos Campus clinico Docente
             $campus_clinico = DB::connection('mysql3')->table('rotacion_semestres')
                 ->join('campus_seccions', 'campus_seccions.seccion_semestre', 'rotacion_semestres.idRotacion')
@@ -472,7 +469,7 @@ class home2 extends Controller
                 ->groupBy('campus_seccions.nrc')
                 ->where([
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['docente_seccions.idDocente', '=', $this->rut]
+                    ['docente_seccions.idDocente', '=', $this->rut],
                 ])
                 ->select(
                     DB::raw('count(distinct(alumnos.rut)) as cant_alumnos_cli, count(campus_seccions.res_encuesta) as resp_encuesta'),
@@ -487,7 +484,7 @@ class home2 extends Controller
                 ->groupBy('campus_seccions.nrc')
                 ->where([
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['docente_seccions.idDocente', '=', $this->rut]
+                    ['docente_seccions.idDocente', '=', $this->rut],
                 ])
                 ->select(DB::raw('count(distinct(campus_seccions.profesor_seccion)) as cant_profesor'), 'campus_seccions.nrc')->get();
 
@@ -501,7 +498,7 @@ class home2 extends Controller
                 ->join('hospitals', 'hospitals.idhospital', 'rotacion_semestres.idhospital')
                 ->where([
                     ['docente_seccions.idDocente', '=', $this->rut],
-                    ['seccion_semestres.idPeriodo', '=', $this->periodos]
+                    ['seccion_semestres.idPeriodo', '=', $this->periodos],
                 ])
                 ->groupBy(
                     'campus_seccions.rotacion',
@@ -542,7 +539,7 @@ class home2 extends Controller
                 ->orderBy('seccion_semestres.nrc')
                 ->where([
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['alumno_seccions.resp_encuesta', '=', 'si']
+                    ['alumno_seccions.resp_encuesta', '=', 'si'],
                 ])
                 ->select(
                     DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
@@ -561,7 +558,7 @@ class home2 extends Controller
                 ->where([
                     ['campus_seccions.res_encuesta', '=', 'si'],
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['docente_seccions.idDocente', '=', $this->rut]
+                    ['docente_seccions.idDocente', '=', $this->rut],
                 ])
                 ->groupBy('campus_seccions.nrc', 'campus_seccions.rotacion')
                 ->select(DB::raw('count(campus_seccions.res_encuesta) as resp_encuesta'), 'campus_seccions.nrc', 'campus_seccions.rotacion')->get();
@@ -576,7 +573,7 @@ class home2 extends Controller
                 ->where([
                     ['campus_seccions.entrega_rubrica', '=', 'si'],
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['docente_seccions.idDocente', '=', $this->rut]
+                    ['docente_seccions.idDocente', '=', $this->rut],
                 ])
                 ->groupBy('campus_seccions.nrc')
                 ->select(DB::raw('count(campus_seccions.entrega_rubrica) as entrego_rubrica'), 'campus_seccions.nrc')->get();
@@ -592,7 +589,7 @@ class home2 extends Controller
                 ->where([
                     ['campus_seccions.res_encuesta', '=', 'si'],
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['docente_seccions.idDocente', '=', $this->rut]
+                    ['docente_seccions.idDocente', '=', $this->rut],
                 ])
                 ->groupBy('campus_seccions.nrc', 'campus_seccions.rotacion')
                 ->select(DB::raw('count(campus_seccions.entrega_rubrica) as entrego_rubrica'), 'campus_seccions.nrc', 'campus_seccions.rotacion')->get();
@@ -608,13 +605,12 @@ class home2 extends Controller
                 ->where([
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
                     ['campus_seccions.res_encuesta', '=', 'si'],
-                    ['docente_seccions.idDocente', '=', $this->rut]
+                    ['docente_seccions.idDocente', '=', $this->rut],
                 ])
                 ->select(
                     DB::raw('count(campus_seccions.res_encuesta) as resp_encuesta'),
                     'campus_seccions.nrc'
                 )->get();
-
 
             //dd($asignatura,$alumnos_teoricos,Auth::user());
             //dd($contador_alumnos_clinicos);
@@ -642,9 +638,9 @@ class home2 extends Controller
                 'respuestas_clinicas' => $respuestas_clinicas,
                 'respuestas_rotaciones' => $respuestas_rotaciones,
                 'entrego_rubrica' => $entregas_rubrica,
-                'rotaciones_rubrica' => $rotaciones_rubrica
+                'rotaciones_rubrica' => $rotaciones_rubrica,
             ]);
-        } else if ($tipo == 'OFEM') {
+        } elseif ('OFEM' == $tipo) {
             $periodos = DB::connection('mysql3')->table('periodos')
                 ->where('estado', '>', '0')->get()->toArray();
 
@@ -718,7 +714,7 @@ class home2 extends Controller
                 ->distinct('seccion_semestres.actividad')->get();
 
             $respuestas_teoricas = DB::connection('mysql3')->table('seccion_semestres')
-            ->join('alumno_seccions', 'seccion_semestres.nrc','=','alumno_seccions.nrc')
+            ->join('alumno_seccions', 'seccion_semestres.nrc', '=', 'alumno_seccions.nrc')
                 ->groupBy('seccion_semestres.actividad', 'seccion_semestres.nrc')
                 ->orderBy('seccion_semestres.nrc')
                 ->whereRaw('seccion_semestres.idDocente = alumno_seccions.idDocente
@@ -736,7 +732,7 @@ class home2 extends Controller
                     $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
                         ->where([
                             ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
-                            ['asignaturas.actividad', 'like', '%TEO%']
+                            ['asignaturas.actividad', 'like', '%TEO%'],
                         ])
                         ->orWhere('asignaturas.actividad', 'like', '%CLI%');
                 })
@@ -753,14 +749,13 @@ class home2 extends Controller
                 ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%'], ['asignaturas.idCarrera', '=', $code_carrera]])
                 ->select(DB::raw('count(distinct(alumno_seccions.rut_alumno)) as cant_alumnos_cli'), 'seccion_semestres.nrc')->get();
 
-
             $contador_docentes_clinicos = DB::connection('mysql3')->table('seccion_semestres')
                 ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
                 ->join('mallas', function ($join) {
                     $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
                         ->where([
                             ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
-                            ['asignaturas.actividad', 'like', '%TEO%']
+                            ['asignaturas.actividad', 'like', '%TEO%'],
                         ])
                         ->orWhere('asignaturas.actividad', 'like', '%CLI%');
                 })
@@ -775,7 +770,7 @@ class home2 extends Controller
                 ->where([
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
                     ['alumno_seccions.resp_encuesta', '=', 'si'],
-                    ['seccion_semestres.actividad', 'like', '%ROTACION%']
+                    ['seccion_semestres.actividad', 'like', '%ROTACION%'],
                 ])
                 ->select(
                     DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
@@ -796,7 +791,7 @@ class home2 extends Controller
                     $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
                         ->where([
                             ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
-                            ['asignaturas.actividad', 'like', '%TEO%']
+                            ['asignaturas.actividad', 'like', '%TEO%'],
                         ])
                         ->orWhere('asignaturas.actividad', 'like', '%CLI%');
                 })->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
@@ -841,7 +836,7 @@ class home2 extends Controller
                     ['alumno_seccions.entrega_rubrica', '=', 1],
                     ['asignaturas.actividad', 'like', '%ROTACION%'],
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['asignaturas.idCarrera', '=', $code_carrera]
+                    ['asignaturas.idCarrera', '=', $code_carrera],
                 ])
                 ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
                 ->select(DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'), 'seccion_semestres.nrc', 'asignaturas.Liga as rotacion')->get();
@@ -852,7 +847,7 @@ class home2 extends Controller
                 ->where([
                     ['alumno_seccions.entrega_rubrica', '=', 1],
                     ['asignaturas.Liga', '!=', ''],
-                    ['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $code_carrera]
+                    ['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $code_carrera],
                 ])
                 ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
                 ->select(DB::raw('count(alumno_seccions.entrega_rubrica) as entrego_rubrica'), 'seccion_semestres.nrc', 'asignaturas.Liga')->get();
@@ -863,7 +858,7 @@ class home2 extends Controller
                 ->where([
                     ['alumno_seccions.entrega_rubrica', '=', 1],
                     ['asignaturas.actividad', 'like', '%ROTACION%'],
-                    ['seccion_semestres.idPeriodo', '=', $this->periodos]
+                    ['seccion_semestres.idPeriodo', '=', $this->periodos],
                 ])
                 ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
                 ->select(DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'), 'seccion_semestres.nrc', 'asignaturas.Liga as rotacion')->get();
@@ -896,10 +891,9 @@ class home2 extends Controller
                 'respuestas_clinicas' => $respuestas_clinicas,
                 'respuestas_rotaciones' => $respuestas_rotaciones,
                 'entrego_rubrica' => $entregas_rubrica,
-                'rotaciones_rubrica' => $rotaciones_rubrica
+                'rotaciones_rubrica' => $rotaciones_rubrica,
             ]);
-        } else if ($tipo == 'SA') {
-
+        } elseif ('SA' == $tipo) {
             $periodos = DB::connection('mysql3')->table('periodos')
                 ->where('estado', '>', '0')->get()->toArray();
             if (empty($periodos[0]->idPeriodo)) {
@@ -981,7 +975,6 @@ class home2 extends Controller
                 ->where([
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
                     ['alumno_seccions.resp_encuesta', '=', 'si'],
-
                 ])
                 ->select(
                     DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
@@ -996,7 +989,7 @@ class home2 extends Controller
                     $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
                         ->where([
                             ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
-                            ['asignaturas.actividad', 'like', '%TEO%']
+                            ['asignaturas.actividad', 'like', '%TEO%'],
                         ])
                         ->orWhere('asignaturas.actividad', 'like', '%CLI%');
                 })
@@ -1013,14 +1006,13 @@ class home2 extends Controller
                 ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%'], ['asignaturas.idCarrera', '=', $code_carrera]])
                 ->select(DB::raw('count(distinct(alumno_seccions.rut_alumno)) as cant_alumnos_cli'), 'seccion_semestres.nrc')->get();
 
-
             $contador_docentes_clinicos = DB::connection('mysql3')->table('seccion_semestres')
                 ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
                 ->join('mallas', function ($join) {
                     $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
                         ->where([
                             ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
-                            ['asignaturas.actividad', 'like', '%TEO%']
+                            ['asignaturas.actividad', 'like', '%TEO%'],
                         ])
                         ->orWhere('asignaturas.actividad', 'like', '%CLI%');
                 })
@@ -1035,7 +1027,7 @@ class home2 extends Controller
                 ->where([
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
                     ['alumno_seccions.resp_encuesta', '=', 'si'],
-                    ['seccion_semestres.actividad', 'like', '%ROTACION%']
+                    ['seccion_semestres.actividad', 'like', '%ROTACION%'],
                 ])
                 ->select(
                     DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
@@ -1056,7 +1048,7 @@ class home2 extends Controller
                     $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
                         ->where([
                             ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
-                            ['asignaturas.actividad', 'like', '%TEO%']
+                            ['asignaturas.actividad', 'like', '%TEO%'],
                         ])
                         ->orWhere('asignaturas.actividad', 'like', '%CLI%');
                 })->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
@@ -1101,7 +1093,7 @@ class home2 extends Controller
                     ['alumno_seccions.entrega_rubrica', '=', 1],
                     ['asignaturas.actividad', 'like', '%ROTACION%'],
                     ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                    ['asignaturas.idCarrera', '=', $code_carrera]
+                    ['asignaturas.idCarrera', '=', $code_carrera],
                 ])
                 ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
                 ->select(DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'), 'seccion_semestres.nrc', 'asignaturas.Liga as rotacion')->get();
@@ -1112,7 +1104,7 @@ class home2 extends Controller
                 ->where([
                     ['alumno_seccions.entrega_rubrica', '=', 1],
                     ['asignaturas.Liga', '!=', ''],
-                    ['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $code_carrera]
+                    ['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $code_carrera],
                 ])
                 ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
                 ->select(DB::raw('count(alumno_seccions.entrega_rubrica) as entrego_rubrica'), 'seccion_semestres.nrc', 'asignaturas.Liga')->get();
@@ -1123,7 +1115,7 @@ class home2 extends Controller
                 ->where([
                     ['alumno_seccions.entrega_rubrica', '=', 1],
                     ['asignaturas.actividad', 'like', '%ROTACION%'],
-                    ['seccion_semestres.idPeriodo', '=', $this->periodos]
+                    ['seccion_semestres.idPeriodo', '=', $this->periodos],
                 ])
                 ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
                 ->select(DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'), 'seccion_semestres.nrc', 'asignaturas.Liga as rotacion')->get();
@@ -1156,7 +1148,7 @@ class home2 extends Controller
                 'respuestas_clinicas' => $respuestas_clinicas,
                 'respuestas_rotaciones' => $respuestas_rotaciones,
                 'entrego_rubrica' => $entregas_rubrica,
-                'rotaciones_rubrica' => $rotaciones_rubrica
+                'rotaciones_rubrica' => $rotaciones_rubrica,
             ]);
         }
     }
@@ -1177,7 +1169,6 @@ class home2 extends Controller
             ->where('seccion_semestres.idPeriodo', '=', $id)
             ->select('seccion_semestres.idPeriodo', 'seccion_semestres.nrc', 'asignaturas.nombre', 'seccion_semestres.actividad', 'seccion_semestres.fecha_inicio_encuesta', 'seccion_semestres.fecha_termino_encuesta')->get();
 
-
         $contador_alumnos = DB::connection('mysql3')->table('seccion_semestres')->join('alumno_seccions', function ($join) {
             $join->on('seccion_semestres.nrc', '=', 'alumno_seccions.nrc');
         })
@@ -1193,7 +1184,7 @@ class home2 extends Controller
             ->orderBy('seccion_semestres.nrc')
             ->where([
                 ['seccion_semestres.idPeriodo', '=', $id],
-                ['alumno_seccions.resp_encuesta', '=', 'si']
+                ['alumno_seccions.resp_encuesta', '=', 'si'],
             ])
             ->select(
                 DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
@@ -1240,7 +1231,7 @@ class home2 extends Controller
             ->groupBy('campus_seccions.nrc')
             ->where([
                 ['seccion_semestres.idPeriodo', '=', $id],
-                ['campus_seccions.res_encuesta', '=', 'si']
+                ['campus_seccions.res_encuesta', '=', 'si'],
             ])
             ->select(
                 DB::raw('count(campus_seccions.res_encuesta) as resp_encuesta'),
@@ -1281,7 +1272,7 @@ class home2 extends Controller
             ->join('campus_decretos', 'rotacion_semestres.idCampus', '=', 'campus_decretos.codigo_campus')
             ->where([
                 ['campus_seccions.res_encuesta', '=', 'si'],
-                ['seccion_semestres.idPeriodo', '=', $id]
+                ['seccion_semestres.idPeriodo', '=', $id],
             ])
             ->groupBy('campus_seccions.nrc', 'campus_seccions.rotacion')
             ->select(DB::raw('count(campus_seccions.res_encuesta) as resp_encuesta'), 'campus_seccions.nrc', 'campus_seccions.rotacion')->get();
@@ -1295,7 +1286,7 @@ class home2 extends Controller
             ->join('rotacion_semestres', 'campus_seccions.rotacion', '=', 'rotacion_semestres.idRotacion')
             ->where([
                 ['campus_seccions.entrega_rubrica', '=', 'si'],
-                ['seccion_semestres.idPeriodo', '=', $id]
+                ['seccion_semestres.idPeriodo', '=', $id],
             ])
             ->groupBy('campus_seccions.nrc')
             ->select(DB::raw('count(campus_seccions.entrega_rubrica) as entrego_rubrica'), 'campus_seccions.nrc')->get();
@@ -1309,11 +1300,10 @@ class home2 extends Controller
             ->join('rotacion_semestres', 'campus_seccions.rotacion', '=', 'rotacion_semestres.idRotacion')
             ->where([
                 ['campus_seccions.entrega_rubrica', '=', 'si'],
-                ['seccion_semestres.idPeriodo', '=', $id]
+                ['seccion_semestres.idPeriodo', '=', $id],
             ])
             ->groupBy('campus_seccions.nrc', 'campus_seccions.rotacion')
             ->select(DB::raw('count(campus_seccions.entrega_rubrica) as entrego_rubrica'), 'campus_seccions.nrc', 'campus_seccions.rotacion')->get();
-
 
         //dd($campus_sa,$num_alumnos_campus_sa,$num_respuestas_campus_sa);
         //dd($rotaciones,$respuestas_rotaciones,$rotaciones_rubrica,$entregas_rubrica);
@@ -1337,10 +1327,11 @@ class home2 extends Controller
             'respuestas_clinicas' => $respuestas_clinicas,
             'respuestas_rotaciones' => $respuestas_rotaciones,
             'entrego_rubrica' => $entregas_rubrica,
-            'rotaciones_rubrica' => $rotaciones_rubrica
+            'rotaciones_rubrica' => $rotaciones_rubrica,
         ]);
     }
-    function periodos_PA($id)
+
+    public function periodos_PA($id)
     {
         $tipo = Auth::user()->tipo;
         $periodos = DB::connection('mysql3')->table('periodos')
@@ -1379,7 +1370,6 @@ class home2 extends Controller
             ->where('seccion_semestres.idPeriodo', '=', $this->periodos)
             ->select(DB::raw('count(alumno_seccions.nrc) as cantidad_seccion'), 'seccion_semestres.nrc', 'seccion_semestres.actividad')->get();
 
-
         //datos Campus clinico Docente
         $campus_clinico = DB::connection('mysql3')->table('rotacion_semestres')
             ->join('campus_seccions', 'campus_seccions.seccion_semestre', 'rotacion_semestres.idRotacion')
@@ -1406,7 +1396,7 @@ class home2 extends Controller
             ->groupBy('campus_seccions.nrc')
             ->where([
                 ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                ['docente_seccions.idDocente', '=', $this->rut]
+                ['docente_seccions.idDocente', '=', $this->rut],
             ])
             ->select(
                 DB::raw('count(distinct(alumnos.rut)) as cant_alumnos_cli, count(campus_seccions.res_encuesta) as resp_encuesta'),
@@ -1421,7 +1411,7 @@ class home2 extends Controller
             ->groupBy('campus_seccions.nrc')
             ->where([
                 ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                ['docente_seccions.idDocente', '=', $this->rut]
+                ['docente_seccions.idDocente', '=', $this->rut],
             ])
             ->select(DB::raw('count(distinct(campus_seccions.profesor_seccion)) as cant_profesor'), 'campus_seccions.nrc')->get();
 
@@ -1435,7 +1425,7 @@ class home2 extends Controller
             ->join('hospitals', 'hospitals.idhospital', 'rotacion_semestres.idhospital')
             ->where([
                 ['docente_seccions.idDocente', '=', $this->rut],
-                ['seccion_semestres.idPeriodo', '=', $this->periodos]
+                ['seccion_semestres.idPeriodo', '=', $this->periodos],
             ])
             ->groupBy(
                 'campus_seccions.rotacion',
@@ -1476,7 +1466,7 @@ class home2 extends Controller
             ->orderBy('seccion_semestres.nrc')
             ->where([
                 ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                ['alumno_seccions.resp_encuesta', '=', 'si']
+                ['alumno_seccions.resp_encuesta', '=', 'si'],
             ])
             ->select(
                 DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
@@ -1495,7 +1485,7 @@ class home2 extends Controller
             ->where([
                 ['campus_seccions.res_encuesta', '=', 'si'],
                 ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                ['docente_seccions.idDocente', '=', $this->rut]
+                ['docente_seccions.idDocente', '=', $this->rut],
             ])
             ->groupBy('campus_seccions.nrc', 'campus_seccions.rotacion')
             ->select(DB::raw('count(campus_seccions.res_encuesta) as resp_encuesta'), 'campus_seccions.nrc', 'campus_seccions.rotacion')->get();
@@ -1510,7 +1500,7 @@ class home2 extends Controller
             ->where([
                 ['campus_seccions.entrega_rubrica', '=', 'si'],
                 ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                ['docente_seccions.idDocente', '=', $this->rut]
+                ['docente_seccions.idDocente', '=', $this->rut],
             ])
             ->groupBy('campus_seccions.nrc')
             ->select(DB::raw('count(campus_seccions.entrega_rubrica) as entrego_rubrica'), 'campus_seccions.nrc')->get();
@@ -1526,7 +1516,7 @@ class home2 extends Controller
             ->where([
                 ['campus_seccions.res_encuesta', '=', 'si'],
                 ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                ['docente_seccions.idDocente', '=', $this->rut]
+                ['docente_seccions.idDocente', '=', $this->rut],
             ])
             ->groupBy('campus_seccions.nrc', 'campus_seccions.rotacion')
             ->select(DB::raw('count(campus_seccions.entrega_rubrica) as entrego_rubrica'), 'campus_seccions.nrc', 'campus_seccions.rotacion')->get();
@@ -1542,7 +1532,7 @@ class home2 extends Controller
             ->where([
                 ['seccion_semestres.idPeriodo', '=', $this->periodos],
                 ['campus_seccions.res_encuesta', '=', 'si'],
-                ['docente_seccions.idDocente', '=', $this->rut]
+                ['docente_seccions.idDocente', '=', $this->rut],
             ])
             ->select(
                 DB::raw('count(campus_seccions.res_encuesta) as resp_encuesta'),
@@ -1573,9 +1563,10 @@ class home2 extends Controller
             'respuestas_clinicas' => $respuestas_clinicas,
             'respuestas_rotaciones' => $respuestas_rotaciones,
             'entrego_rubrica' => $entregas_rubrica,
-            'rotaciones_rubrica' => $rotaciones_rubrica
+            'rotaciones_rubrica' => $rotaciones_rubrica,
         ]);
     }
+
     public function encuesta(Request $request)
     {
         define('LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
@@ -1591,7 +1582,7 @@ class home2 extends Controller
         $survey_id = Str::after($url, 'limesurvey.test/index.php/');
 
         // instantiate a new client
-        $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient(LS_BASEURL . '/admin/remotecontrol');
+        $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient(LS_BASEURL.'/admin/remotecontrol');
 
         // receive session key
         $sessionKey = $myJSONRPCClient->get_session_key(LS_USER, LS_PASSWORD);
@@ -1599,9 +1590,9 @@ class home2 extends Controller
         // receive surveys list current user can read
         $groups = $myJSONRPCClient->list_surveys($sessionKey);
 
-        $users = [array('email' => Auth::user()->email, 'token' => $this->rut)];
+        $users = [['email' => Auth::user()->email, 'token' => $this->rut]];
 
-        $attributes = ["completed", "usesleft"];
+        $attributes = ['completed', 'usesleft'];
 
         $adding_participants = $myJSONRPCClient->add_participants($sessionKey, $survey_id, $users, false);
 
@@ -1609,8 +1600,9 @@ class home2 extends Controller
         // release the session key
         $myJSONRPCClient->release_session_key($sessionKey);
 
-        return redirect()->away('http://' . $url);
+        return redirect()->away('http://'.$url);
     }
+
     public function carreras_SA($id)
     {
         $tipo = Auth::user()->tipo;
@@ -1693,7 +1685,6 @@ class home2 extends Controller
             ->where([
                 ['seccion_semestres.idPeriodo', '=', $this->periodos],
                 ['alumno_seccions.resp_encuesta', '=', 'si'],
-
             ])
             ->select(
                 DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
@@ -1708,7 +1699,7 @@ class home2 extends Controller
                 $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
                     ->where([
                         ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
-                        ['asignaturas.actividad', 'like', '%TEO%']
+                        ['asignaturas.actividad', 'like', '%TEO%'],
                     ])
                     ->orWhere('asignaturas.actividad', 'like', '%CLI%');
             })
@@ -1724,10 +1715,9 @@ class home2 extends Controller
             ->groupBy('seccion_semestres.nrc')
             ->where([
                 ['seccion_semestres.idPeriodo', '=', $this->periodos], ['seccion_semestres.actividad', 'like', '%ROTACION%'],
-                ['asignaturas.idCarrera', '=', $id]
+                ['asignaturas.idCarrera', '=', $id],
             ])
             ->select(DB::raw('count(distinct(alumno_seccions.rut_alumno)) as cant_alumnos_cli'), 'seccion_semestres.nrc')->get();
-
 
         $contador_docentes_clinicos = DB::connection('mysql3')->table('seccion_semestres')
             ->join('asignaturas', 'asignaturas.idAsignatura', '=', 'seccion_semestres.nrc')
@@ -1735,7 +1725,7 @@ class home2 extends Controller
                 $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
                     ->where([
                         ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
-                        ['asignaturas.actividad', 'like', '%TEO%']
+                        ['asignaturas.actividad', 'like', '%TEO%'],
                     ])
                     ->orWhere('asignaturas.actividad', 'like', '%CLI%');
             })
@@ -1750,7 +1740,7 @@ class home2 extends Controller
             ->where([
                 ['seccion_semestres.idPeriodo', '=', $this->periodos],
                 ['alumno_seccions.resp_encuesta', '=', 'si'],
-                ['seccion_semestres.actividad', 'like', '%ROTACION%']
+                ['seccion_semestres.actividad', 'like', '%ROTACION%'],
             ])
             ->select(
                 DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'),
@@ -1771,7 +1761,7 @@ class home2 extends Controller
                 $join->on('mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
                     ->where([
                         ['mallas.CampusClinico', '=', 1], ['mallas.Encuesta', '=', 1],
-                        ['asignaturas.actividad', 'like', '%TEO%']
+                        ['asignaturas.actividad', 'like', '%TEO%'],
                     ])
                     ->orWhere('asignaturas.actividad', 'like', '%CLI%');
             })->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
@@ -1782,7 +1772,7 @@ class home2 extends Controller
             ->join('docentes', 'docentes.rut', '=', 'seccion_semestres.idDocente')
             ->where([
                 ['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.actividad', 'like', '%ROTACION%'],
-                ['asignaturas.idCarrera', '=', $id]
+                ['asignaturas.idCarrera', '=', $id],
             ])
             ->groupBy(
                 'asignaturas.actividad',
@@ -1819,7 +1809,7 @@ class home2 extends Controller
                 ['alumno_seccions.entrega_rubrica', '=', 1],
                 ['asignaturas.actividad', 'like', '%ROTACION%'],
                 ['seccion_semestres.idPeriodo', '=', $this->periodos],
-                ['asignaturas.idCarrera', '=', $id]
+                ['asignaturas.idCarrera', '=', $id],
             ])
             ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
             ->select(DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'), 'seccion_semestres.nrc', 'asignaturas.Liga as rotacion')->get();
@@ -1830,7 +1820,7 @@ class home2 extends Controller
             ->where([
                 ['alumno_seccions.entrega_rubrica', '=', 1],
                 ['asignaturas.Liga', '!=', ''],
-                ['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $id]
+                ['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.idCarrera', '=', $id],
             ])
             ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
             ->select(DB::raw('count(alumno_seccions.entrega_rubrica) as entrego_rubrica'), 'seccion_semestres.nrc', 'asignaturas.Liga')->get();
@@ -1841,7 +1831,7 @@ class home2 extends Controller
             ->where([
                 ['alumno_seccions.entrega_rubrica', '=', 1],
                 ['asignaturas.actividad', 'like', '%ROTACION%'],
-                ['seccion_semestres.idPeriodo', '=', $this->periodos]
+                ['seccion_semestres.idPeriodo', '=', $this->periodos],
             ])
             ->groupBy('seccion_semestres.nrc', 'asignaturas.Liga')
             ->select(DB::raw('count(alumno_seccions.resp_encuesta) as resp_encuesta'), 'seccion_semestres.nrc', 'asignaturas.Liga as rotacion')->get();
@@ -1874,7 +1864,7 @@ class home2 extends Controller
             'respuestas_clinicas' => $respuestas_clinicas,
             'respuestas_rotaciones' => $respuestas_rotaciones,
             'entrego_rubrica' => $entregas_rubrica,
-            'rotaciones_rubrica' => $rotaciones_rubrica
+            'rotaciones_rubrica' => $rotaciones_rubrica,
         ]);
     }
 }
