@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Docente;
 use App\Http\Controllers\Controller;
-use App\User;
+use App\Model\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -58,17 +57,15 @@ class RegisterController extends Controller
     /**
      * Create a new user instance after a valid registration.
      *
-     * @return \App\User
+     * @return \App\Model\User
      */
     protected function create(array $data)
     {
-        Docente::where('rut', '=', $data['rut'])->update(['email' => $data['email']]);
-
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'tipo' => 'docente',
+            'tipo' => $data['type'],
         ]);
     }
 }

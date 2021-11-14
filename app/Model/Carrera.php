@@ -1,12 +1,12 @@
 <?php
 
-namespace App;
+namespace App\Model;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Periodo extends Model
+class Carrera extends Model
 {
     protected $connection = 'mysql3';
-    protected $fillable = ['idPeriodo','descripcion','estado'];
     public $timestamps = false;
+    protected $fillable = ['idCarrera', 'nombre'];
 }

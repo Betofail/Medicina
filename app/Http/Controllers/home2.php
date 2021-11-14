@@ -13,6 +13,10 @@ class home2 extends Controller
     private $periodos;
     private $date;
 
+    public const LS_BASEURL = 'http://limesurvey.test/index.php'; // adjust this one to your actual LimeSurvey URL
+    public const LS_USER = 'Alberto';
+    public const LS_PASSWORD = 'master12';
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -20,10 +24,6 @@ class home2 extends Controller
 
     public function index()
     {
-        define('LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
-        define('LS_USER', 'Alberto');
-        define('LS_PASSWORD', 'master12');
-
         $periodos = DB::connection('mysql3')->table('periodos')
             ->where('estado', '>', '1')->get()->toArray();
 
@@ -1569,10 +1569,6 @@ class home2 extends Controller
 
     public function encuesta(Request $request)
     {
-        define('LS_BASEURL', 'http://limesurvey.test/index.php');  // adjust this one to your actual LimeSurvey URL
-        define('LS_USER', 'Alberto');
-        define('LS_PASSWORD', 'master12');
-
         $this->rut = DB::connection('mysql3')->table('alumnos')->where('email', Auth::user()->email)->value('rut');
 
         $this->rut = substr((string) $this->rut, 0, 4);

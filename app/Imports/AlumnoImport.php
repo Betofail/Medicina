@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use App\Periodo;
 use App\Carrera;
-use App\User;
+use App\Model\User;
 use Maatwebsite\Excel\Concerns\ToCollection;
 
 class AlumnoImport implements ToCollection

@@ -1,3 +1,5 @@
-<?php 
-	echo phpinfo();
-?>
+<?php
+
+namespace App;
+
+    echo phpinfo();

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Malla;
+use App\Model\Malla;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 

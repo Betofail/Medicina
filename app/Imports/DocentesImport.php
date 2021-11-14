@@ -4,7 +4,7 @@ namespace App\Imports;
 
 use Illuminate\Support\Collection;
 use App\Docente;
-use App\User;
+use App\Model\User;
 use App\Seccion_semestre;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToCollection;
