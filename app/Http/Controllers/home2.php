@@ -650,11 +650,13 @@ class home2 extends Controller
                 $this->periodos = $periodos[0]->idPeriodo;
             }
             //Para usuarios con mas de una carrera
-            $carreras = DB::connection('mysql3')->table('user_carrera')->join('carreras', 'carreras.idCarrera', '=', 'user_carrera.CodCarrera')
-                ->select('carreras.nombre', 'carreras.idCarrera')
+            $carreras = DB::connection('mysql3')->table('user_carrera')->join('carreras', 'carreras.codigo_carrera', '=', 'user_carrera.CodCarrera')
+                ->select('carreras.nombre', 'carreras.codigo_carrera')
                 ->where('idUser', '=', Auth::user()->id)->get();
-
-            $code_carrera = $carreras[0]->idCarrera;
+            $code_carrera = 0;
+            if ($carreras->isNotEmpty()) {
+                $code_carrera = $carreras[0]->codigo_carrera;
+            }
             $asignaturas = DB::connection('mysql3')->table('seccion_semestres')
 
                 ->join('asignaturas', 'seccion_semestres.nrc', '=', 'asignaturas.idAsignatura')
@@ -902,11 +904,14 @@ class home2 extends Controller
                 $this->periodos = $periodos[0]->idPeriodo;
             }
             //Para usuarios con mas de una carrera
-            $carreras = DB::connection('mysql3')->table('user_carrera')->join('carreras', 'carreras.idCarrera', '=', 'user_carrera.CodCarrera')
-                ->select('carreras.nombre', 'carreras.idCarrera')
+            $carreras = DB::connection('mysql3')->table('user_carrera')->join('carreras', 'carreras.codigo_carrera', '=', 'user_carrera.CodCarrera')
+                ->select('carreras.nombre', 'carreras.codigo_carrera')
                 ->where('idUser', '=', Auth::user()->id)->get();
+            $code_carrera = 0;
 
-            $code_carrera = $carreras[0]->idCarrera;
+            if ($carreras->isNotEmpty()) {
+                $code_carrera = $carreras[0]->codigo_carrera;
+            }
 
             //Asignaturas Teoricas
             $asignaturas = DB::connection('mysql3')->table('seccion_semestres')
@@ -1610,8 +1615,8 @@ class home2 extends Controller
             $this->periodos = $periodos[0]->idPeriodo;
         }
         //Para usuarios con mas de una carrera
-        $carreras = DB::connection('mysql3')->table('user_carrera')->join('carreras', 'carreras.idCarrera', '=', 'user_carrera.CodCarrera')
-            ->select('carreras.nombre', 'carreras.idCarrera')
+        $carreras = DB::connection('mysql3')->table('user_carrera')->join('carreras', 'carreras.codigo_carrera', '=', 'user_carrera.CodCarrera')
+            ->select('carreras.nombre', 'carreras.codigo_carrera')
             ->where('idUser', '=', Auth::user()->id)->get();
 
         //Asignaturas Teoricas

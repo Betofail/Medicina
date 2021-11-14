@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateRotacionSemestresTable extends Migration
 {
@@ -15,14 +15,14 @@ class CreateRotacionSemestresTable extends Migration
     {
         Schema::connection('mysql3')->create('rotacion_semestres', function (Blueprint $table) {
             $table->integer('idRotacion');
-            $table->date('fecha_inicio');
-            $table->date('fecha_termino');
+            $table->date('fecha_inicio')->nullable();
+            $table->date('fecha_termino')->nullable();
             $table->unsignedBigInteger('idCampus');
-            $table->unsignedBigInteger('idHospital');
+            $table->unsignedBigInteger('idHospital')->nullable();
             $table->integer('cupos');
             $table->unsignedBigInteger('idPeriodo');
-            $table->date('fecha_inicio_encuesta');
-            $table->date('fecha_termino_encuesta');
+            $table->date('fecha_inicio_encuesta')->nullable();
+            $table->date('fecha_termino_encuesta')->nullable();
         });
     }
 

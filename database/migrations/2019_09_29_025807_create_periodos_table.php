@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreatePeriodosTable extends Migration
 {
@@ -15,7 +15,7 @@ class CreatePeriodosTable extends Migration
     {
         Schema::connection('mysql3')->create('periodos', function (Blueprint $table) {
             $table->bigIncrements('idPeriodo');
-            $table->string('decripcion');
+            $table->string('descripcion');
             $table->integer('estado');
         });
     }

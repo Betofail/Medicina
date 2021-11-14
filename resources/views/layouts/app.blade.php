@@ -58,8 +58,7 @@
                             <a class="nav-link" href="{{route('home')}}">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{route('notificacion')}}">Notificaciones<span
-                                    class="badge">1</span></a>
+                            <a class="nav-link" href="{{route('notificacion')}}">Notificaciones</a>
                         </li>
                         <li class="nav-item dropdown">
                             <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"

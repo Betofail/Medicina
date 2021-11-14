@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateMallasTable extends Migration
 {
@@ -15,12 +15,13 @@ class CreateMallasTable extends Migration
     {
         Schema::connection('mysql3')->create('mallas', function (Blueprint $table) {
             $table->bigIncrements('idMalla');
-            $table->string('CodAsign',50)->unique();
-            $table->string('Nombre',100);
+            $table->string('CodAsign', 50)->unique();
+            $table->string('Nombre', 100);
             $table->boolean('Encuesta');
-            $table->string('CodCarrera',50);
-            $table->string('PeriodoCatalogo',100);
+            $table->string('CodCarrera', 50);
+            $table->string('PeriodoCatalogo', 100);
             $table->boolean('Vigente');
+            $table->boolean('CampusClinico');
         });
     }
 

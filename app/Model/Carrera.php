@@ -8,5 +8,5 @@ class Carrera extends Model
 {
     protected $connection = 'mysql3';
     public $timestamps = false;
-    protected $fillable = ['idCarrera', 'nombre'];
+    protected $fillable = ['idCarrera', 'nombre', 'codigo_carrera'];
 }

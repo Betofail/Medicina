@@ -20,10 +20,10 @@ class CreateAsignaturasTable extends Migration
             $table->string('idCarrera');
             $table->string('semestre');
             $table->string('sede');
-            $table->tinyInteger('confirmacion_semestre');
-            $table->string('actividad');
-            $table->string('LCruzada');
-            $table->string('Liga');
+            $table->tinyInteger('confirmacion_semestre')->nullable();
+            $table->string('actividad')->nullable();
+            $table->string('LCruzada')->nullable();
+            $table->string('Liga')->nullable();
         });
     }
 

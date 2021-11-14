@@ -41,12 +41,12 @@
                             @if($tipo == 'SA')
                             @foreach ($carreras as $key => $value)
                             <a class="dropdown-item"
-                                href="{{route('carrera_sa',['id'=>$value->idCarrera])}}">{{$value->nombre}}</a>
+                                href="{{route('carrera_sa',['id'=>$value->codigo_carrera])}}">{{$value->nombre}}</a>
                             @endforeach
                             @elseif($tipo == 'OFEM')
                             @foreach ($carreras as $key => $value)
                             <a class="dropdown-item"
-                                href="{{route('carrera_ofem',['id'=>$value->idCarrera])}}">{{$value->nombre}}</a>
+                                href="{{route('carrera_ofem',['id'=>$value->codigo_carrera])}}">{{$value->nombre}}</a>
                             @endforeach
                             @endif
                         </div>

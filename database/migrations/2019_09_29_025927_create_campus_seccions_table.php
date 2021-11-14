@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateCampusSeccionsTable extends Migration
 {
@@ -21,10 +21,10 @@ class CreateCampusSeccionsTable extends Migration
             $table->string('link_encuesta');
             $table->string('profesor_seccion');
             $table->integer('nrc');
-            $table->date('fecha_inicio');
-            $table->date('fecha_termino');
-            $table->string('res_encuesta');
-            $table->string('entrega_rubrica');
+            $table->date('fecha_inicio')->nullable();
+            $table->date('fecha_termino')->nullable();
+            $table->string('res_encuesta')->nullable();
+            $table->string('entrega_rubrica')->nullable();
         });
     }
 
