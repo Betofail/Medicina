@@ -15,8 +15,8 @@ class CreateAlumnoSeccionsTable extends Migration
     {
         Schema::connection('mysql3')->create('alumno_seccions', function (Blueprint $table) {
             $table->bigIncrements('idSeccion');
-            $table->string('rut_alumno')->unique();
-            $table->unsignedBigInteger('nrc');
+            $table->string('rut_alumno');
+            $table->integer('nrc');
             $table->string('resp_encuesta');
             $table->integer('idDocente');
             $table->boolean('entrega_rubrica');

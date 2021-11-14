@@ -21,8 +21,7 @@ class AsignaturaImport implements ToCollection
         $carrera = preg_replace('/[^A-Za-z0-9\-]/', '', $carrera);
         $nombre_carrera = trim($chunk[2][4]);
 
-        if (Periodo::where('idPeriodo', '=', $periodo)->count() > 0) {
-        } else {
+        if (0 == Periodo::where('idPeriodo', '=', $periodo)->count()) {
             $periodo_doc = Periodo::create([
                 'idPeriodo' => $periodo,
                 'descripcion' => $nombre_periodo,
@@ -31,22 +30,19 @@ class AsignaturaImport implements ToCollection
             $periodo_doc->save();
         }
 
-        if (Carrera::where('idCarrera', '=', $carrera)->count() > 0) {
-        } else {
+        if (0 == Carrera::where('codigo_carrera', '=', $carrera)->count()) {
             $carrera_doc = Carrera::create([
-            'idCarrera' => $carrera,
-            'nombre' => $nombre_carrera,
-            ]);
+                'codigo_carrera' => $carrera,
+                'nombre' => $nombre_carrera,
+                ]);
             $carrera_doc->save();
         }
+
         $chunk = $chunk->splice(6);
+
         foreach ($chunk as $key => $value) {
-            if (Asignatura::where('idAsignatura', '=', $value[8])->where('actividad', '=', $value[18])->count() > 0) {
-                continue;
-            } else {
-                if (count($value[6]) > 5) {
-                    continue;
-                } else {
+            if (0 == Asignatura::where('idAsignatura', '=', $value[8])->where('actividad', '=', $value[18])->count()) {
+                if ($value[6] < 5) {
                     if (1 == strlen($value[5])) {
                         $codigo_asig = $value[4].'00'.$value[5];
                     } elseif (2 == strlen($value[5])) {
@@ -56,8 +52,9 @@ class AsignaturaImport implements ToCollection
                     }
 
                     $liga = str_replace(' ', '', $value[10]);
+
                     $asignatura = Asignatura::Create([
-                        'idAsignatura' => $value[8],
+                        'nrcAsignatura' => $value[8],
                         'codigo_asignatura' => $codigo_asig,
                         'nombre' => $value[16],
                         'idCarrera' => $carrera,
@@ -68,6 +65,7 @@ class AsignaturaImport implements ToCollection
                         'LCruzada' => $value[11],
                         'actividad' => $value[18],
                     ]);
+
                     $asignatura->save();
                 }
             }

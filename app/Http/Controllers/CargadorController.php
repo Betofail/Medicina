@@ -69,7 +69,7 @@ class CargadorController extends Controller
             } catch (\InvalidArgumentException $e) {
                 return back()->with('error', 'Algo salio mal, algun dato no es corrrecto');
             } catch (\Illuminate\Database\QueryException $e) {
-                return back()->with('error', 'inconsistencia de datos');
+                return back()->with('error', $e);
             }
 
             return back()->with('success', 'se cargo el archivo correctamente');
@@ -112,11 +112,11 @@ class CargadorController extends Controller
             try {
                 Excel::import(new AsignaturaImport(), $request->file('file_asignatura'));
             } catch (\Exception $e) {
-                return back()->with('error', 'Algo salio mal, revice su archivo');
+                return back()->with('error', $e);
             } catch (\Error $e) {
-                return back()->with('error', 'Algo salio mal, revice su archivo');
+                return back()->with('error', $e);
             } catch (\InvalidArgument $e) {
-                return back()->with('error', 'Algo salio mal, revice su archivo');
+                return back()->with('error', $e);
             } catch (\Illuminate\Database\QueryException $e) {
                 return back()->with('error', 'inconsistencia de datos');
             }

@@ -14,16 +14,17 @@ class CreateAsignaturasTable extends Migration
     public function up()
     {
         Schema::connection('mysql3')->create('asignaturas', function (Blueprint $table) {
-            $table->string('idAsignatura')->primary();
+            $table->bigIncrements('idAsignatura');
+            $table->string('nrcAsignatura');
             $table->string('codigo_asignatura');
             $table->string('nombre');
-            $table->string('idCarrera');
-            $table->string('semestre');
-            $table->string('sede');
+            $table->string('idCarrera')->nullable();
+            $table->string('semestre')->nullable();
+            $table->string('sede')->nullable();
             $table->tinyInteger('confirmacion_semestre')->nullable();
-            $table->string('actividad')->nullable();
+            $table->string('actividad');
             $table->string('LCruzada')->nullable();
-            $table->string('Liga')->nullable();
+            $table->longText('Liga')->nullable();
         });
     }
 

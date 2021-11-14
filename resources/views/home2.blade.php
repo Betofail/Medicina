@@ -7,46 +7,39 @@
             <div class="card text-center">
                 <div class="card-header">
                     <div class="dropdown d-inline-block ">
-                        <button class="btn btn-default dropdown-toggle" type="button" id="periodo_dropdown"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <button class="btn btn-default dropdown-toggle" type="button" id="periodo_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             Resumen Periodo {{$code_periodo}}
                         </button>
                         <div class="dropdown-menu" aria-labelledby="periodo_dropdown">
                             @if($tipo == 'PA')
                             @foreach($periodos as $key=>$value)
-                            <a class="dropdown-item"
-                                href="{{route('periodo_pa',['id'=>$value->idPeriodo])}}">{{$value->descripcion}}</a>
+                            <a class="dropdown-item" href="{{route('periodo_pa',['id'=>$value->idPeriodo])}}">{{$value->descripcion}}</a>
                             @endforeach
 
                             @elseif($tipo == 'SA')
                             @foreach($periodos as $key=>$value)
-                            <a class="dropdown-item"
-                                href="{{route('periodo_sa',['id'=>$value->idPeriodo])}}">{{$value->descripcion}}</a>
+                            <a class="dropdown-item" href="{{route('periodo_sa',['id'=>$value->idPeriodo])}}">{{$value->descripcion}}</a>
                             @endforeach
 
                             @elseif($tipo == "docente")
                             @foreach($periodos as $key=>$value)
-                            <a class="dropdown-item"
-                                href="{{route('periodo_doc',['id'=>$value->idPeriodo])}}">{{$value->descripcion}}</a>
+                            <a class="dropdown-item" href="{{route('periodo_doc',['id'=>$value->idPeriodo])}}">{{$value->descripcion}}</a>
                             @endforeach
                             @endif
                         </div>
                     </div>
                     @if($tipo == 'SA' or $tipo == 'OFEM')
                     <div class="dropdown d-inline-block">
-                        <button class="btn btn-default dropdown-toggle" type="button" id="carrera_dropdown"
-                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Carrera {{$code_carrera}}
+                        <button class="btn btn-default dropdown-toggle" type="button" id="carrera_dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Carrera {{$code_carrera}}
                         </button>
                         <div class="dropdown-menu" aria-labelledby="carrera_dropdown">
                             @if($tipo == 'SA')
                             @foreach ($carreras as $key => $value)
-                            <a class="dropdown-item"
-                                href="{{route('carrera_sa',['id'=>$value->codigo_carrera])}}">{{$value->nombre}}</a>
+                            <a class="dropdown-item" href="{{route('carrera_sa',['id'=>$value->codigo_carrera])}}">{{$value->nombre}}</a>
                             @endforeach
                             @elseif($tipo == 'OFEM')
                             @foreach ($carreras as $key => $value)
-                            <a class="dropdown-item"
-                                href="{{route('carrera_ofem',['id'=>$value->codigo_carrera])}}">{{$value->nombre}}</a>
+                            <a class="dropdown-item" href="{{route('carrera_ofem',['id'=>$value->codigo_carrera])}}">{{$value->nombre}}</a>
                             @endforeach
                             @endif
                         </div>
@@ -84,7 +77,7 @@
                             @endif
                         </thead>
                         <tbody>
-                        @foreach($asignaturas as $key => $value)
+                            @foreach($asignaturas as $key => $value)
                             <tr>
                                 <td>{{$value->nrc}}</td>
                                 <td>{{$value->nombre}}</td>
@@ -93,93 +86,87 @@
                                 <td>{{$value->fecha_termino_encuesta}}</td>
                                 <td>{{$value->actividad}}</td>
 
-                        @if($tipo == 'alumno')
-                            @if($value->link_encuesta == "none")
+                                @if($tipo == 'alumno')
+                                @if($value->link_encuesta == "none")
                                 <td>none</td>
-                            @else
-                                @if(empty($estados))
-                                    <td><a href="{{action('home2@encuesta',['url' =>$value->link_encuesta])}}"
-                                        target="_blank">{{substr($value->link_encuesta,-6)}}</a></td>
                                 @else
-                                    @foreach($estados as $key_st => $value_st)
-                                        @if($value_st['nrc'] == $value->nrc && $value_st['estado'] == "N")
-                                            <td><a href="{{action('home2@encuesta',['url' =>$value->link_encuesta])}}"
-                                            target="_blank">Encuesta: {{substr($value->link_encuesta,-6)}}</a></td>
-                                            @break
-                                        @elseif($value_st['nrc'] == $value->nrc && $value_st['estado'] != "N")
-                                            <td>Completado</td>
-                                            @break
-                                        @elseif($value_st['nrc'] != $value->nrc)
-                                            <td><a href="{{action('home2@encuesta',['url' =>$value->link_encuesta])}}"
-                                            target="_blank">Encuesta: {{substr($value->link_encuesta,-6)}}</a></td>
-                                            @break
-                                        @endif
-                                    @endforeach
+                                @if(empty($estados))
+                                <td><a href="{{action('home2@encuesta',['url' =>$value->link_encuesta])}}" target="_blank">{{substr($value->link_encuesta,-6)}}</a></td>
+                                @else
+                                @foreach($estados as $key_st => $value_st)
+                                @if($value_st['nrc'] == $value->nrc && $value_st['estado'] == "N")
+                                <td><a href="{{action('home2@encuesta',['url' =>$value->link_encuesta])}}" target="_blank">Encuesta: {{substr($value->link_encuesta,-6)}}</a></td>
+                                @break
+                                @elseif($value_st['nrc'] == $value->nrc && $value_st['estado'] != "N")
+                                <td>Completado</td>
+                                @break
+                                @elseif($value_st['nrc'] != $value->nrc)
+                                <td><a href="{{action('home2@encuesta',['url' =>$value->link_encuesta])}}" target="_blank">Encuesta: {{substr($value->link_encuesta,-6)}}</a></td>
+                                @break
                                 @endif
-                            @endif
-                            @else
+                                @endforeach
+                                @endif
+                                @endif
+                                @else
                                 <td>Encuesta: {{substr($value->link_encuesta,-6)}}</td>
                                 @if($cantidad_teoricos->isEmpty())
-                                        <td><Button type="submit" class="btn btn-lg" data-toggle="modal"
-                                        data-target="#modal{{$key}}">
+                                <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#modal{{$key}}">
                                         <i class="fa fa-address-book" style="font-size: 16px" aria-hidden="true"></i>
                                         <span>0</span></Button></td>
 
-                                    @if($respuestas_teoricas->isEmpty())
-                                        <td>0</td>
-                                    @else
-                                        @foreach($respuestas_teoricas as $key_resp => $val_resp)
-                                            @if($val_resp->nrc == $cant_val->nrc && $cant_val->actividad == $val_resp->actividad)
-                                            <td>{{number_format(($respuestas_teoricas[$key_resp]->resp_encuesta/$cant_val->cantidad_seccion) * 100,2)}}
-                                            </td>
-                                             @else
+                                @if($respuestas_teoricas->isEmpty())
+                                <td>0</td>
+                                @else
+                                @foreach($respuestas_teoricas as $key_resp => $val_resp)
+                                @if($val_resp->nrc == $cant_val->nrc && $cant_val->actividad == $val_resp->actividad)
+                                <td>{{number_format(($respuestas_teoricas[$key_resp]->resp_encuesta/$cant_val->cantidad_seccion) * 100,2)}}
+                                </td>
+                                @else
 
-                                            @endif
-                                        @endforeach
-                                    @endif
+                                @endif
+                                @endforeach
+                                @endif
 
                                 @elseif($tipo == 'alumno')
 
                                 @else
-                                    @if($cantidad_teoricos->contains('nrc',$value->nrc))
-                                        @foreach($cantidad_teoricos as $cant_key => $cant_val)
-                                            @if($cant_val->nrc == $value->nrc && $cant_val->actividad == $value->actividad)
-                                                @foreach ($contador_registros as $res_key => $res_val)
-                                                    @if($cant_val->nrc == $res_val->nrc && $cant_val->actividad == $res_val->actividad)
-                                                        <td><Button type="submit" class="btn btn-lg" data-toggle="modal"
-                                                            data-target="#modal{{$key}}">
-                                                        <i class="fa fa-address-book" style="font-size: 16px" aria-hidden="true"></i>
-                                                        <span>{{$cant_val->cantidad_seccion / $res_val->registros}}</span></Button></td>
-                                                    @else
-
-                                                    @endif
-                                                @endforeach
-
-                                            @if($respuestas_teoricas->isEmpty())
-                                                <td>0</td>
-
-                                            @else
-                                                @foreach($respuestas_teoricas as $key_resp => $val_resp)
-                                                    @if($val_resp->nrc == $cant_val->nrc and $cant_val->actividad == $val_resp->actividad)
-                                                        <td>{{round(($respuestas_teoricas[$key_resp]->resp_encuesta/$cant_val->cantidad_seccion) * 100)}}
-                                                        </td>
-                                                    @elseif($val_resp->nrc != $cant_val->nrc)
-                                                        <td>0</td>
-                                                        @break
-                                                    @else
-                                                        <td>0</td>
-                                                        @break
-                                                    @endif
-                                                @endforeach
-                                            @endif
-
-                                    @else
-                                        @continue
-                                    @endif
-                                    @endforeach
+                                @if($cantidad_teoricos->contains('nrc',$value->nrc))
+                                @foreach($cantidad_teoricos as $cant_key => $cant_val)
+                                @if($cant_val->nrc == $value->nrc && $cant_val->actividad == $value->actividad)
+                                @foreach ($contador_registros as $res_key => $res_val)
+                                @if($cant_val->nrc == $res_val->nrc && $cant_val->actividad == $res_val->actividad)
+                                <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#modal{{$key}}">
+                                        <i class="fa fa-address-book" style="font-size: 16px" aria-hidden="true"></i>
+                                        <span>{{$cant_val->cantidad_seccion / $res_val->registros}}</span></Button></td>
                                 @else
-                                    <td><Button type="submit" class="btn btn-lg" data-toggle="modal"
-                                        data-target="#modal{{$key}}">
+
+                                @endif
+                                @endforeach
+
+                                @if($respuestas_teoricas->isEmpty())
+                                <td>0</td>
+
+                                @else
+                                @foreach($respuestas_teoricas as $key_resp => $val_resp)
+                                @if($val_resp->nrc == $cant_val->nrc and $cant_val->actividad == $val_resp->actividad)
+                                <td>{{round(($respuestas_teoricas[$key_resp]->resp_encuesta/$cant_val->cantidad_seccion) * 100)}}
+                                </td>
+                                @elseif($val_resp->nrc != $cant_val->nrc)
+                                <td>0</td>
+                                @break
+                                @else
+                                <td>0</td>
+                                @break
+                                @endif
+                                @endforeach
+                                @endif
+
+                                @else
+                                @continue
+                                @endif
+                                @endforeach
+                                @else
+                                <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#modal{{$key}}">
                                         <i class="fa fa-address-book" style="font-size: 16px" aria-hidden="true"></i>
                                         <span>0</span></Button></td>
 
@@ -237,70 +224,69 @@
                                 <td>{{$value->nrc}}</td>
                                 <td>{{$value->nombre_asignatura}}</td>
                                 @if($tipo == 'docente' or $tipo == 'SA' or $tipo == 'PA' or $tipo == 'OFEM')
-                                @if($contador_alumnos_clinicos->isEmpty())
-                                <td><Button type="submit" class="btn btn-lg" data-toggle="modal"
-                                        data-target="#campus_alu{{$key}}">
-                                        <i class="fa fa-address-book" style="font-size: 16px" aria-hidden="true"></i>
-                                        <span>0</span></Button></td>
-                                @else
-                                @foreach ($contador_alumnos_clinicos as $item => $val_al)
-                                @if($val_al->Liga == '/'.$value->nrc)
-                                <td><Button type="submit" class="btn btn-lg" data-toggle="modal"
-                                        data-target="#campus_alu{{$key}}">
-                                        <i class="fa fa-address-book" style="font-size: 16px" aria-hidden="true"></i>
-                                        <span>{{$val_al->cant_alumnos_cli}}</span></Button>
-                                </td>
-                                @else
-
-                                @endif
-                                @endforeach
+                                    @if($contador_alumnos_clinicos->isEmpty())
+                                    <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#campus_alu{{$key}}">
+                                            <i class="fa fa-address-book" style="font-size: 16px" aria-hidden="true"></i>
+                                            <span>0</span></Button></td>
+                                    @else
+                                    @foreach ($contador_alumnos_clinicos as $item => $val_al)
+                                        @if($val_al->Liga == '/'.$value->nrc)
+                                        <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#campus_alu{{$key}}">
+                                                <i class="fa fa-address-book" style="font-size: 16px" aria-hidden="true"></i>
+                                                <span>{{$val_al->cant_alumnos_cli}}</span></Button>
+                                        </td>
+                                        @elseif($val_al->nrc == $value->nrc)
+                                        <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#campus_alu{{$key}}">
+                                                <i class="fa fa-address-book" style="font-size: 16px" aria-hidden="true"></i>
+                                                <span>{{$val_al->cant_alumnos_cli}}</span></Button>
+                                        </td>
+                                        @else
+                                        @endif
+                                    @endforeach
                                 @endif
                                 @if($contador_docentes_clinicos->isEmpty())
-                                <td><Button type="submit" class="btn btn-lg" data-toggle="modal"
-                                        data-target="#campus_doc{{$key}}">
-                                        <i class="fa fa-users" style="font-size: 16px" aria-hidden="true"></i>
-                                        <span>0</span></Button></td>
+                                    <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#campus_doc{{$key}}">
+                                            <i class="fa fa-users" style="font-size: 16px" aria-hidden="true"></i>
+                                            <span>0</span></Button></td>
                                 @else
-                                @foreach ($contador_docentes_clinicos as $item => $val_dc)
-                                @if($val_dc->nrc == $value->nrc)
-                                <td><Button type="submit" class="btn btn-lg" data-toggle="modal"
-                                        data-target="#campus_doc{{$key}}">
-                                        <i class="fa fa-users" style="font-size: 16px" aria-hidden="true"></i>
-                                        <span>{{$val_dc->cant_profesor}}</span></Button></td>
-                                @elseif(!$contador_docentes_clinicos->contains('nrc',$value->nrc))
-                                <td><Button type="submit" class="btn btn-lg" data-toggle="modal"
-                                        data-target="#campus_doc{{$key}}">
-                                        <i class="fa fa-users" style="font-size: 16px" aria-hidden="true"></i>
-                                        <span>0</span></Button></td>
-                                @break
+                                    @foreach ($contador_docentes_clinicos as $item => $val_dc)
+                                        @if($val_dc->nrc == $value->nrc)
+                                            <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#campus_doc{{$key}}">
+                                                    <i class="fa fa-users" style="font-size: 16px" aria-hidden="true"></i>
+                                                    <span>{{$val_dc->cant_profesor}}</span></Button></td>
+                                        @elseif(!$contador_docentes_clinicos->contains('nrc',$value->nrc))
+                                            <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#campus_doc{{$key}}">
+                                                    <i class="fa fa-users" style="font-size: 16px" aria-hidden="true"></i>
+                                                    <span>0</span></Button></td>
+                                            @break
+                                        @endif
+                                    @endforeach
                                 @endif
-                                @endforeach
-                                @endif
-                                <td data-toggle="collapse" data-target="#acrodion{{$key}}" class="accordion-toggle">
-                                    <button class="btn btn-default"><i class="fa fa-arrow-circle-down"></i></button>
-                                </td>
+                                    <td data-toggle="collapse" data-target="#acrodion{{$key}}" class="accordion-toggle">
+                                        <button class="btn btn-default"><i class="fa fa-arrow-circle-down"></i></button>
+                                    </td>
                                 @if($respuestas_clinicas->isEmpty())
                                 <td>0</td>
                                 @else
-                                @foreach($respuestas_clinicas as $cli_key => $cli_val)
-                                @if($cli_val->nrc == $value->nrc)
-                                <td>{{number_format(($cli_val->resp_encuesta/$contador_alumnos_clinicos[$key]->cant_alumnos_cli)*100,2)}}
-                                </td>
-                                @else
-
+                                    @foreach($respuestas_clinicas as $cli_key => $cli_val)
+                                        @if($cli_val->nrc == $value->nrc)
+                                            <td>{{number_format(($cli_val->resp_encuesta/$contador_alumnos_clinicos[$key]->cant_alumnos_cli)*100,2)}}
+                                            </td>
+                                            @break
+                                        @else
                                 @endif
                                 @endforeach
-                                @endif
+                                @endif 
 
                                 @if($entrego_rubrica->isEmpty())
                                 <td>0</td>
                                 @else
                                 @foreach($entrego_rubrica as $cli_ent_key => $cli_ent_val)
-                                @if($cli_ent_val->nrc == $value->nrc)
-                                <td>{{number_format(($cli_ent_val->entrego_rubrica / $contador_alumnos_clinicos[$key]->cant_alumnos_cli)*100,2)}}
-                                </td>
-                                @else
-
+                                    @if($cli_ent_val->Liga == '/'.$value->nrc)
+                                    {{-- <td>{{ $cli_ent_val->entrego_rubrica }}
+                                    </td> --}}
+                                    @break
+                                    @else
                                 @endif
                                 @endforeach
                                 @endif
@@ -311,13 +297,11 @@
                                     <button class="btn btn-default"><i class="fa fa-arrow-circle-down"></i></button>
                                 </td>
                                 @else
-                                <td><Button type="submit" class="btn btn-lg" data-toggle="modal"
-                                        data-target="#campus_alu{{$key}}">
+                                <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#campus_alu{{$key}}">
                                         <i class="fa fa-address-book" style="font-size: 16px" aria-hidden="true"></i>
                                         <span>{{$contador_alumnos_clinicos[$key]->cant_alumnos_cli}}</span></Button>
                                 </td>
-                                <td><Button type="submit" class="btn btn-lg" data-toggle="modal"
-                                        data-target="#campus_doc{{$key}}">
+                                <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#campus_doc{{$key}}">
                                         <i class="fa fa-users" style="font-size: 16px" aria-hidden="true"></i>
                                         <span>{{$contador_docentes_clinicos[$key]->cant_profesor}}</span></Button></td>
                                 <td data-toggle="collapse" data-target="#acrodion{{$key}}" class="accordion-toggle">
@@ -387,34 +371,38 @@
                                                     @if($tipo == 'alumno')
                                                     <td>{{$value_rot->link_encuesta}}</td>
                                                     @else
-                                                    @if($contador_alumnos_rotacion->isEmpty())
-                                                    <td>0</td>
-                                                    @else
-                                                    <td>{{$contador_alumnos_rotacion[$key]->cantidad_alumno}}</td>
-                                                    @endif
-                                                    @if($respuestas_rotaciones->isEmpty())
-                                                    <td>0</td>
-                                                    @else
-                                                    @foreach($respuestas_rotaciones as $resp_key => $resp_value)
-                                                    @if($resp_value->rotacion == '/'.$value_rot->nrc)
-                                                    <td>{{number_format(($resp_value->resp_encuesta / $value_rot->numero_alumno) * 100,2)}}
-                                                    </td>
+                                                    @foreach($contador_alumnos_rotacion as $key => $contadorAlumnosCli)
+                                                    @if($contadorAlumnosCli->nrc == $value_rot->nrc)
+                                                    <td>{{ $contadorAlumnosCli->cantidad_alumno}}</td>
                                                     @else
 
                                                     @endif
+                                                    @endforeach
+
+                                                    @if($respuestas_rotaciones->isEmpty())
+                                                       
+                                                    @else
+                                                    @foreach($respuestas_rotaciones as $resp_key => $resp_value)
+                                                        @if($resp_value->rotacion == '/'.$value_rot->nrc)
+                                                          @break
+                                                        @else
+                                                        @break
+                                                        @endif
                                                     @endforeach
                                                     @endif
                                                     @if($rotaciones_rubrica->isEmpty())
-                                                    <td>0</td>
+                                                       
                                                     @else
-                                                    @foreach($rotaciones_rubrica as $rot_rub_key => $rot_rub_value)
-                                                    @if($rot_rub_value->rotacion == '/'.$value_rot->nrc)
-                                                    <td>{{number_format(($rot_rub_value->entrego_rubrica / $value_rot->numero_alumno) * 100,2)}}
-                                                    </td>
-                                                    @else
-
-                                                    @endif
-                                                    @endforeach
+                                                        @foreach($rotaciones_rubrica as $rot_rub_key => $rot_rub_value)
+                                                        @if($rot_rub_value->nrc == $value_rot->nrc)
+                                                            <td>{{($rot_rub_value->resp_encuesta *100) /$contadorAlumnosCli->cantidad_alumno}}</td>
+                                                            @break
+                                                        @else
+                                                            <td>0</td>
+                                                            @break
+                                                        @endif
+                                                        
+                                                        @endforeach
                                                     @endif
                                                     @endif
                                                 </tr>
@@ -440,8 +428,8 @@
         @else
         @foreach($asignaturas as $key => $value)
         <!-- Modal Alumnos Teoricos-->
-        <div id="modal{{$key}}" class="modal fade" role="dialog">
-            <div class="modal-dialog">
+        <div id="modal{{$key}}" tabindex="-1" class="modal fade" role="dialog">
+            <div class="modal-dialog" role="document">
                 <!-- Modal content-->
                 <div class="modal-content">
                     <div class="modal-header">
@@ -449,24 +437,28 @@
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                     </div>
                     <div class="modal-body">
-                        <table class="table table-responsive">
-                            <thead>
-                                <th>Rut</th>
-                                <th>Nombre Completo</th>
-                                <th>Encuesta S/N</th>
-                            </thead>
-                            <tbody>
-                                @foreach($alumnos_teoricos as $key_alum => $value_alum)
-                                @if($value_alum->nrc == $value->nrc && $value_alum->actividad == $value->actividad)
-                                <tr>
-                                    <td>{{$value_alum->rut}}</td>
-                                    <td>{{$value_alum->nombre}}</td>
-                                    <td>{{$value_alum->resp_encuesta}}</td>
-                                </tr>
-                                @endif
-                                @endforeach
-                            </tbody>
-                        </table>
+                        <div class="container-fluid">
+                            <div class="row">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <th>Rut</th>
+                                        <th>Nombre Completo</th>
+                                        <th>Encuesta S/N</th>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($alumnos_teoricos as $key_alum => $value_alum)
+                                        @if($value_alum->nrc == $value->nrc && $value_alum->actividad == $value->actividad)
+                                        <tr>
+                                            <td>{{$value_alum->rut}}</td>
+                                            <td>{{$value_alum->nombre}}</td>
+                                            <td>{{$value_alum->resp_encuesta}}</td>
+                                        </tr>
+                                        @endif
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -479,7 +471,7 @@
         @foreach($campus_clinico as $key => $value)
         <!-- Modal Campus Clinico Alumnos -->
         <div id="campus_alu{{$key}}" class="modal fade" role="dialog">
-            <div class="modal-dialog modal-sm">
+            <div class="modal-dialog">
                 <!-- Modal content-->
                 <div class="modal-content">
                     <div class="modal-header">
