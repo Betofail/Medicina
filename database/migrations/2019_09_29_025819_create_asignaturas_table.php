@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateAsignaturasTable extends Migration
 {
@@ -21,6 +21,9 @@ class CreateAsignaturasTable extends Migration
             $table->string('semestre');
             $table->string('sede');
             $table->tinyInteger('confirmacion_semestre');
+            $table->string('actividad');
+            $table->string('LCruzada');
+            $table->string('Liga');
         });
     }
 

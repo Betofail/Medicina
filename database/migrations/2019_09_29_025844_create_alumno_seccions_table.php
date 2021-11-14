@@ -1,8 +1,8 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateAlumnoSeccionsTable extends Migration
 {
@@ -18,6 +18,8 @@ class CreateAlumnoSeccionsTable extends Migration
             $table->string('rut_alumno')->unique();
             $table->unsignedBigInteger('nrc');
             $table->string('resp_encuesta');
+            $table->integer('idDocente');
+            $table->boolean('entrega_rubrica');
         });
     }
 
