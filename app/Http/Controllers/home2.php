@@ -59,7 +59,7 @@ class home2 extends Controller
                         ->where('alumno_seccions.rut_alumno', '=', $this->rut);
                 })
                 ->join('asignaturas', 'seccion_semestres.nrc', '=', 'asignaturas.nrcAsignatura')
-                ->select('seccion_semestres.idPeriodo', 'seccion_semestres.nrc', 'asignaturas.nombre')
+                ->select('seccion_semestres.idPeriodo', 'seccion_semestres.nrc', 'asignaturas.nombre as nombre_asignatura')
                 ->where([['seccion_semestres.idPeriodo', '=', $this->periodos], ['asignaturas.Liga', '!=', '']])
                 ->distinct()
                 ->get();
@@ -116,33 +116,33 @@ class home2 extends Controller
                 }
             }
 
-            // instantiate a new client
-            $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient(LS_BASEURL.'/admin/remotecontrol');
+            // // instantiate a new client
+            // $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient(LS_BASEURL.'/admin/remotecontrol');
 
-            // receive session key
-            $sessionKey = $myJSONRPCClient->get_session_key(LS_USER, LS_PASSWORD);
+            // // receive session key
+            // $sessionKey = $myJSONRPCClient->get_session_key(LS_USER, LS_PASSWORD);
 
-            $aConditions = ['email' => Auth::user()->email];
+            // $aConditions = ['email' => Auth::user()->email];
 
-            $attributes = ['completed', 'usesleft'];
+            // $attributes = ['completed', 'usesleft'];
 
-            $count = 0;
+            // $count = 0;
 
-            foreach ($surveys_ids as $key => $value) {
-                $list_participants = $myJSONRPCClient->list_participants($sessionKey, $value['id'], 0, 100, false, $attributes, $aConditions);
+            // foreach ($surveys_ids as $key => $value) {
+            //     $list_participants = $myJSONRPCClient->list_participants($sessionKey, $value['id'], 0, 100, false, $attributes, $aConditions);
 
-                if (!isset($list_participants[0])) {
-                    continue;
-                } else {
-                    if ($list_participants[0]['participant_info']['email'] == Auth::user()->email and 'Y' == $list_participants[0]['completed']) {
-                        DB::table('alumno_seccions')->where([['rut_alumno', '=', $this->rut], ['nrc', '=', $value['nrc']]])
-                        ->update(['resp_encuesta' => 'Y']);
-                    }
-                    $estatus[$count] = ['nrc' => $value['nrc'], 'estado' => $list_participants[0]['completed']];
-                    ++$count;
-                }
-            }
-            $myJSONRPCClient->release_session_key($sessionKey);
+            //     if (!isset($list_participants[0])) {
+            //         continue;
+            //     } else {
+            //         if ($list_participants[0]['participant_info']['email'] == Auth::user()->email and 'Y' == $list_participants[0]['completed']) {
+            //             DB::table('alumno_seccions')->where([['rut_alumno', '=', $this->rut], ['nrc', '=', $value['nrc']]])
+            //             ->update(['resp_encuesta' => 'Y']);
+            //         }
+            //         $estatus[$count] = ['nrc' => $value['nrc'], 'estado' => $list_participants[0]['completed']];
+            //         ++$count;
+            //     }
+            // }
+            // $myJSONRPCClient->release_session_key($sessionKey);
 
             return view('home2', [
                 'tipo' => $tipo,
@@ -336,6 +336,20 @@ class home2 extends Controller
                 ->groupBy('campus_seccions.nrc', 'campus_seccions.rotacion')
                 ->select(DB::raw('count(campus_seccions.entrega_rubrica) as entrego_rubrica'), 'campus_seccions.nrc', 'campus_seccions.rotacion')->get();
 
+            $contador_registros = DB::connection('mysql3')->table('seccion_semestres')
+                ->select(
+                    DB::raw('count(seccion_semestres.nrc) as registros'),
+                    'seccion_semestres.nrc',
+                    'seccion_semestres.actividad',
+                    'seccion_semestres.idDocente',
+                    'seccion_semestres.idPeriodo'
+                )
+                ->join('asignaturas', 'seccion_semestres.nrc', '=', 'asignaturas.nrcAsignatura')
+                ->join('mallas', 'mallas.CodAsign', '=', 'asignaturas.codigo_asignatura')
+                ->whereRaw('mallas.Encuesta = 1 AND asignaturas.actividad = seccion_semestres.actividad')
+                ->groupBy('seccion_semestres.nrc', 'seccion_semestres.actividad', 'seccion_semestres.idDocente', 'seccion_semestres.idPeriodo')
+                ->distinct('seccion_semestres.actividad')->get();
+
             $respuestas_clinicas = DB::connection('mysql3')->table('seccion_semestres')
                 ->join('campus_seccions', function ($join) {
                     $join->on('seccion_semestres.idSeccion', '=', 'campus_seccions.seccion_semestre');
@@ -365,6 +379,7 @@ class home2 extends Controller
                 'tipo' => $tipo,
                 'periodos' => $periodos,
                 'code_periodo' => $this->periodos,
+                'contador_registros' => $contador_registros,
                 'asignaturas' => $asignatura,
                 'cantidad_teoricos' => $contador_alumnos,
                 'contador_alumnos_clinicos' => $contador_alumnos_clinicos,
@@ -1683,37 +1698,37 @@ class home2 extends Controller
         ]);
     }
 
-    public function encuesta(Request $request)
-    {
-        $this->rut = DB::connection('mysql3')->table('alumnos')->where('email', Auth::user()->email)->value('rut');
+    // public function encuesta(Request $request)
+    // {
+    //     $this->rut = DB::connection('mysql3')->table('alumnos')->where('email', Auth::user()->email)->value('rut');
 
-        $this->rut = substr((string) $this->rut, 0, 4);
-        // the survey to process
-        $url = $request->query('url');
+    //     $this->rut = substr((string) $this->rut, 0, 4);
+    //     // the survey to process
+    //     $url = $request->query('url');
 
-        $survey_id = Str::after($url, 'limesurvey.test/index.php/');
+    //     $survey_id = Str::after($url, 'limesurvey.test/index.php/');
 
-        // instantiate a new client
-        $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient(LS_BASEURL.'/admin/remotecontrol');
+    //     // instantiate a new client
+    //     $myJSONRPCClient = new \org\jsonrpcphp\JsonRPCClient(LS_BASEURL.'/admin/remotecontrol');
 
-        // receive session key
-        $sessionKey = $myJSONRPCClient->get_session_key(LS_USER, LS_PASSWORD);
+    //     // receive session key
+    //     $sessionKey = $myJSONRPCClient->get_session_key(LS_USER, LS_PASSWORD);
 
-        // receive surveys list current user can read
-        $groups = $myJSONRPCClient->list_surveys($sessionKey);
+    //     // receive surveys list current user can read
+    //     $groups = $myJSONRPCClient->list_surveys($sessionKey);
 
-        $users = [['email' => Auth::user()->email, 'token' => $this->rut]];
+    //     $users = [['email' => Auth::user()->email, 'token' => $this->rut]];
 
-        $attributes = ['completed', 'usesleft'];
+    //     $attributes = ['completed', 'usesleft'];
 
-        $adding_participants = $myJSONRPCClient->add_participants($sessionKey, $survey_id, $users, false);
+    //     $adding_participants = $myJSONRPCClient->add_participants($sessionKey, $survey_id, $users, false);
 
-        //dd($groups,$users,$url,$survey_id,$adding_participants,$this->rut);
-        // release the session key
-        $myJSONRPCClient->release_session_key($sessionKey);
+    //     //dd($groups,$users,$url,$survey_id,$adding_participants,$this->rut);
+    //     // release the session key
+    //     $myJSONRPCClient->release_session_key($sessionKey);
 
-        return redirect()->away('http://'.$url);
-    }
+    //     return redirect()->away('http://'.$url);
+    // }
 
     public function carreras_SA($id)
     {

@@ -108,7 +108,7 @@
                                 @endif
                                 @endif
                                 @else
-                                <td>Encuesta: {{substr($value->link_encuesta,-6)}}</td>
+                                {{-- <td>Encuesta: {{substr($value->link_encuesta,-6)}}</td> --}}
                                 @if($cantidad_teoricos->isEmpty())
                                 <td><Button type="submit" class="btn btn-lg" data-toggle="modal" data-target="#modal{{$key}}">
                                         <i class="fa fa-address-book" style="font-size: 16px" aria-hidden="true"></i>
@@ -369,11 +369,12 @@
                                                     <td>{{$value_rot->nombre}}</td>
 
                                                     @if($tipo == 'alumno')
-                                                    <td>{{$value_rot->link_encuesta}}</td>
+                                                    {{-- <td>{{$value_rot->link_encuesta}}</td> --}}
                                                     @else
                                                     @foreach($contador_alumnos_rotacion as $key => $contadorAlumnosCli)
                                                     @if($contadorAlumnosCli->nrc == $value_rot->nrc)
                                                     <td>{{ $contadorAlumnosCli->cantidad_alumno}}</td>
+                                                    @break
                                                     @else
 
                                                     @endif
@@ -383,6 +384,7 @@
                                                        
                                                     @else
                                                     @foreach($respuestas_rotaciones as $resp_key => $resp_value)
+                                                       
                                                         @if($resp_value->rotacion == '/'.$value_rot->nrc)
                                                           @break
                                                         @else
@@ -395,7 +397,7 @@
                                                     @else
                                                         @foreach($rotaciones_rubrica as $rot_rub_key => $rot_rub_value)
                                                         @if($rot_rub_value->nrc == $value_rot->nrc)
-                                                            <td>{{($rot_rub_value->resp_encuesta *100) /$contadorAlumnosCli->cantidad_alumno}}</td>
+                                                            <td>{{number_format(($rot_rub_value->resp_encuesta *100) /$contadorAlumnosCli->cantidad_alumno),2, '.', ''}}</td>
                                                             @break
                                                         @else
                                                             <td>0</td>
